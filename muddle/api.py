@@ -1,5 +1,4 @@
 import requests
-import sys
 
 MOODLE_WS_ENDPOINT = "/webservice/rest/server.php"
 
@@ -16,26 +15,46 @@ class Muddle():
     def course(self, course_id):
         return Course(course_id)
 
-    def courses(self, course_ids=None):
-        """ Returns list of all courses """
+    def courses(self, course_ids):
+        return Courses(course_ids)
 
-        #params = self.request_params
-        #print(str(course_ids))
-        #params.update({'wsfunction': 'core_course_get_courses',
-        #               'options': str(course_ids)})
-        #return requests.post(self.api_url, params=params, verify=False)
-        return NotImplemented
+
+class Courses(Muddle):
+    """ Represents API endpoints for Moodle Courses """
+
+    def __init__(self, course_ids):
+        self.course_ids = course_ids
+
+    def delete(self):
+        """
+        Deletes all specified courses
+        """
+
+        option_params = {}
+        for index, id in enumerate(self.course_ids):
+            option_params.update(
+                {'courseids[' + str(index) + ']': id})
+
+        params = {'wsfunction': 'core_course_delete_courses'}
+        params.update(option_params)
+        params.update(self.request_params)
+
+        return requests.post(self.api_url, params=params, verify=False)
 
 
 class Course(Muddle):
-    """ Represents API endpoints for Moodle Courses """
+    """ Represents API endpoints for a Moodle Course """
 
     def __init__(self, course_id):
         self.course_id = course_id
 
     @property
     def contents(self):
-        """ Returns entire contents of course page """
+        """
+        Returns entire contents of course page
+
+        :returns: response object
+        """
 
         params = self.request_params
         params.update({'wsfunction': 'core_course_get_contents',
@@ -44,16 +63,31 @@ class Course(Muddle):
 
     def duplicate(self, fullname, shortname, categoryid,
                   visible=True, **kwargs):
-        ## Ideally categoryid should be optional here and
-        ## should default to catid of course being duplicated.
         """
-        Duplicate an existing course
-        (creating a new one) without user data.
+        Duplicates an existing course with options.
 
-        REST (POST parameters)
+        :param string fullname: The new course's full name
+        :param string shortname: The new course's short name
+        :param string categoryid: Category new course should be created under
 
-        &options[1][key]=blocks&options[1][value]=1
+        :keyword bool visible: The new course's visiblity
+        :keyword bool activities: Include course activites
+        :keyword bool blocks: Include course blocks
+        :keyword bool filters: Include course filters
+        :keyword bool users: Include users
+        :keyword bool role_assignments: Include role assignments
+        :keyword bool comments: Include user comments
+        :keyword bool usercompletion: Inclue user course completion information
+        :keyword bool logs: Include course logs
+        :keyword bool grade_histories: Include histories
+
+        :returns: response object
         """
+
+        # TODO
+        # Ideally categoryid should be optional here and
+        # should default to catid of course being duplicated.
+
         allowed_options = ['activities', 'blocks',
                            'filters', 'users',
                            'role_assignments', 'comments',
@@ -69,7 +103,7 @@ class Course(Muddle):
         for index, key in enumerate(kwargs):
             option_params.update(
                 {'options[' + str(index) + '][name]': key,
-                 'options[' + str(index) + '][value]': kwargs.get(key)})
+                 'options[' + str(index) + '][value]': int(kwargs.get(key))})
 
         params = {'wsfunction': 'core_course_duplicate_course',
                   'courseid': self.course_id,
@@ -98,12 +132,6 @@ class Course(Muddle):
                        'courseid': self.course_id})
         return NotImplemented
 
-    def delete(self):
-        """
-        Deletes all specified courses
-        core_course_delete_courses
-        """
-        return NotImplemented
 
     def categories(self):
         """
