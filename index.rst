@@ -13,6 +13,15 @@ Contents:
 
    README
    HISTORY 
+   
+.. automodule:: muddle.api
+
+.. autoclass:: Muddle
+  :members:
+.. autoclass:: Course
+  :members: 
+.. autoclass:: Courses
+  :members: 
 
 
 Indices and tables
