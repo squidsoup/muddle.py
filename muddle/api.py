@@ -1,10 +1,20 @@
 import requests
 
-MOODLE_WS_ENDPOINT = "/webservice/rest/server.php"
+MOODLE_WS_ENDPOINT = '/webservice/rest/server.php'
+
+
+def valid_options(kwargs, allowed_options):
+    """ Checks that kwargs are valid API options"""
+
+    diff = set(kwargs) - set(allowed_options)
+    if diff:
+        print("Invalid option(s): ", ', '.join(diff))
+        return False
+    return True
 
 
 class Muddle():
-    """The main Muddle class."""
+    """The main Muddle class"""
 
     def authenticate(self, api_key, api_url):
         Muddle.api_key = api_key
@@ -48,6 +58,64 @@ class Course(Muddle):
     def __init__(self, course_id):
         self.course_id = course_id
 
+    def create(self, fullname, shortname, categoryid, **kwargs):
+        """
+        Create a new course
+
+        :param string fullname: The course's fullname
+        :param string shortname: The course's shortname
+        :param int categoryid: The course's category
+
+        :keyword string idnumber: Optional. Course ID number. \
+            Yes, it's a string, blame Moodle.
+        :keyword int summaryformat: Optional. Defaults to 1 (HTML). \
+            Summary format options: (1 = HTML, 0 = Moodle, 2 = Plain, \
+            or 4 = Markdown)
+        :keyword string format: Optional. Defaults to "topics"
+            Topic options: (weeks, topics, social, site)
+        :keyword bool showgrades: Optional. Defaults to True. \
+            Determines if grades are shown
+        :keyword int newsitems: Optional. Defaults to 5. \
+            Number of recent items appearing on the course page
+        :keyword bool startdate: Optional. Timestamp when the course start
+        :keyword int maxbytes: Optional. Defaults to 83886080. \
+            Largest size of file that can be uploaded into the course
+        :keyword bool showreports: Default to True. Are activity report shown?
+        :keyword bool visible: Optional. Determines if course is \
+            visible to students
+        :keyword int groupmode: Optional. Defaults to 2.
+            options: (0 = no group, 1 = separate, 2 = visible)
+        :keyword bool groupmodeforce: Optional. Defaults to False. \
+            Force group mode
+        :keyword int defaultgroupingid: Optional. Defaults to 0. \
+            Default grouping id
+        :keyword bool enablecompletion: Optional. Enable control via \
+            completion in activity settings.
+        :keyword bool completionstartonenrol: Optional. \
+            Begin tracking a student's progress in course completion after
+        :keyword bool completionnotify: Optional. Default? Dunno. \
+            Presumably notifies course completion
+        :keyword string lang: Optional. Force course language.
+        :keyword string forcetheme: Optional. Name of the force theme
+
+        """
+
+        allowed_options = ['idnumber', 'summaryformat',
+                           'format', 'showgrades',
+                           'newsitems', 'startdate',
+                           'maxbytes', 'showreports',
+                           'visible', 'groupmode',
+                           'groupmodeforce', 'jdefaultgroupingid',
+                           'enablecompletion', 'completionstartonenrol',
+                           'completionnotify', 'lang',
+                           'forcetheme']
+
+        if valid_options(kwargs, allowed_options):
+            params = {'wsfunction': 'core_course_create_courses',
+                      'courseid': self.course_id}
+            params.update(self.request_params)
+        return NotImplemented
+
     @property
     def contents(self):
         """
@@ -70,16 +138,22 @@ class Course(Muddle):
         :param string shortname: The new course's short name
         :param string categoryid: Category new course should be created under
 
-        :keyword bool visible: The new course's visiblity
-        :keyword bool activities: Include course activites
-        :keyword bool blocks: Include course blocks
-        :keyword bool filters: Include course filters
-        :keyword bool users: Include users
-        :keyword bool role_assignments: Include role assignments
-        :keyword bool comments: Include user comments
-        :keyword bool usercompletion: Inclue user course completion information
-        :keyword bool logs: Include course logs
-        :keyword bool grade_histories: Include histories
+        :keyword bool visible: Defaults to True. The new course's visiblity
+        :keyword bool activities: Optional. Defaults to True. \
+            Include course activites
+        :keyword bool blocks: Optional. Defaults to True. Include course blocks
+        :keyword bool filters: Optional. Defaults to True. \
+            Include course filters
+        :keyword bool users: Optional. Defaults to False. Include users
+        :keyword bool role_assignments: Optional. Defaults to False. \
+            Include role assignments
+        :keyword bool comments: Optional. Defaults to False. \
+            Include user comments
+        :keyword bool usercompletion: Optional. Defaults to False. \
+            Include user course completion information
+        :keyword bool logs: Optional. Defaults to False. Include course logs
+        :keyword bool grade_histories: Optional. Defaults to False. \
+            Include histories
 
         :returns: response object
         """
@@ -94,26 +168,23 @@ class Course(Muddle):
                            'usercompletion', 'logs',
                            'grade_histories']
 
-        diff = set(kwargs) - set(allowed_options)
-        if diff:
-            print("course.duplicate() - invalid option(s): ", ', '.join(diff))
-            return
+        if valid_options(kwargs, allowed_options):
+            option_params = {}
+            for index, key in enumerate(kwargs):
+                option_params.update(
+                    {'options[' + str(index) + '][name]': key,
+                     'options[' + str(index) + '][value]':
+                        int(kwargs.get(key))})
 
-        option_params = {}
-        for index, key in enumerate(kwargs):
-            option_params.update(
-                {'options[' + str(index) + '][name]': key,
-                 'options[' + str(index) + '][value]': int(kwargs.get(key))})
-
-        params = {'wsfunction': 'core_course_duplicate_course',
-                  'courseid': self.course_id,
-                  'fullname': fullname,
-                  'shortname': shortname,
-                  'categoryid': categoryid,
-                  'visible': int(visible)}
-        params.update(option_params)
-        params.update(self.request_params)
-        return requests.post(self.api_url, params=params, verify=False)
+            params = {'wsfunction': 'core_course_duplicate_course',
+                      'courseid': self.course_id,
+                      'fullname': fullname,
+                      'shortname': shortname,
+                      'categoryid': categoryid,
+                      'visible': int(visible)}
+            params.update(option_params)
+            params.update(self.request_params)
+            return requests.post(self.api_url, params=params, verify=False)
 
     def import_data(self):
         """
@@ -123,15 +194,12 @@ class Course(Muddle):
         """
         return NotImplemented
 
-    def create(self):
-        """
-        Create new courses
-        """
-        params = self.request_params
-        params.update({'wsfunction': 'core_course_create_courses',
-                       'courseid': self.course_id})
-        return NotImplemented
 
+class Category(Muddle):
+    """ Represents API endpoints for Moodle Courses Categories """
+
+    def __init__(self, course_ids):
+        self.course_ids = course_ids
 
     def categories(self):
         """
