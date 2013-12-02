@@ -220,7 +220,8 @@ class Category(Muddle):
 
         :param string name: new category name
         :param int parent: (optional) Defaults to 0, root category. \
-        The parent category id inside which the new category will be created
+            The parent category id inside which the new \
+            category will be created
         :param string description: (optional) The new category description
         :param int descriptionformat: (optional) Defaults to 1 \
             description format (1 = HTML,
@@ -232,10 +233,7 @@ class Category(Muddle):
         Example Usage::
 
         >>> import muddle
-        >>> new_category = muddle.category()
-            .create('category name',
-                    parent=10,
-                    description='my new category'
+        >>> muddle.category().create('category name')
         """
         allowed_options = ['parent',
                            'description',
@@ -256,15 +254,27 @@ class Category(Muddle):
 
             return requests.post(self.api_url, params=params, verify=False)
 
+    def delete(self, new_parent=None, recursive=False):
+        """
+        Deletes a category. Optionally moves content to new category.
+        Note: If category is in root, new_parent must be specified.
+
+        :param int new_parent: (optional) Category ID of new parent
+        :param bool recursive: recursively delete contents inside this category
+        """
+
+        params = {'wsfunction': 'core_course_delete_categories',
+                  'categories[0][id]': self.category_id,
+                  'categories[0][recursive]': int(recursive)}
+        if new_parent:
+            params.update({'categories[0][newparent]': new_parent})
+        params.update(self.request_params)
+
+        return requests.post(self.api_url, params=params, verify=False)
+
     def update_category(self):
         """
         core_course_update_categories
         Update categories
         """
 
-    def delete_category(self):
-        """
-        core_course_delete_categories
-        Delete course categories
-        """
-        return NotImplemented
