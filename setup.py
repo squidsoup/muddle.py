@@ -21,7 +21,7 @@ required = [
 setup(
     name='muddle',
     version='0.1.0',
-    description='Moodle API Wrapper.',
+    description='Moodle 2.0 WebService API Wrapper.',
     long_description=open('README.rst').read() + '\n\n' +
     open('HISTORY.rst').read(),
     author='Kit Randel',
@@ -38,9 +38,7 @@ setup(
         'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
-        #'Programming Language :: Python :: 2.6',
-        #'Programming Language :: Python :: 2.7',
-        #'Programming Language :: Python :: 3.0',
+        'Programming Language :: Python :: 3.0',
         'Programming Language :: Python :: 3.1',
     ),
 )
