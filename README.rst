@@ -3,6 +3,8 @@ muddle.py
 
 A python wrapper for the Moodle 2.0 Web API.
 
+.. image:: https://badge.fury.io/py/muddle.png
+    :target: http://badge.fury.io/py/muddle
 
 API Coverage
 -----------
