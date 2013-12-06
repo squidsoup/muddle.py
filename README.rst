@@ -8,8 +8,8 @@ A python wrapper for the Moodle 2.0 Web API.
 
 API Coverage
 -----------
-19% core API coverage
-Complete: core_course_*
+* 19% core API coverage
+* Complete: core_course_*
 
 Usage
 -----
