@@ -26,7 +26,7 @@ class Muddle():
 
     def authenticate(self, api_key, api_url):
         Muddle.api_key = api_key
-        Muddle.api_url = ''.join([api_url, MOODLE_WS_ENDPOINT])
+        Muddle.api_url = api_url + MOODLE_WS_ENDPOINT
         Muddle.request_params = {'wstoken': api_key,
                                  'moodlewsrestformat': 'json'}
 
@@ -40,16 +40,16 @@ class Muddle():
 class Course(Muddle):
     """ Represents API endpoints for a Moodle Course """
 
-    def __init__(self, course_id):
+    def __init__(self, course_id=None):
         self.course_id = course_id
 
-    def create(self, fullname, shortname, categoryid, **kwargs):
+    def create(self, fullname, shortname, category_id, **kwargs):
         """
         Create a new course
 
         :param string fullname: The course's fullname
         :param string shortname: The course's shortname
-        :param int categoryid: The course's category
+        :param int category_id: The course's category
 
         :keyword string idnumber: (optional) Course ID number. \
             Yes, it's a string, blame Moodle.
@@ -96,10 +96,23 @@ class Course(Muddle):
                            'forcetheme']
 
         if valid_options(kwargs, allowed_options):
+            option_params = {}
+            for index, key in enumerate(kwargs):
+                val = kwargs.get(key)
+
+                if isinstance(val, bool):
+                    val = int(val)
+
+                option_params.update({'courses[0][' + key + ']': val})
+
             params = {'wsfunction': 'core_course_create_courses',
-                      'courseid': self.course_id}
+                      'courses[0][fullname]': fullname,
+                      'courses[0][shortname]': shortname,
+                      'courses[0][categoryid]': category_id}
+
+            params.update(option_params)
             params.update(self.request_params)
-        return NotImplemented
+            return requests.post(self.api_url, params=params, verify=False)
 
     def delete(self):
         """
@@ -107,12 +120,11 @@ class Course(Muddle):
         """
 
         params = {'wsfunction': 'core_course_delete_courses',
-                  'courseid': self.course_id}
+                  'courseids[0]': self.course_id}
         params.update(self.request_params)
 
         return requests.post(self.api_url, params=params, verify=False)
 
-    @property
     def contents(self):
         """
         Returns entire contents of course page
@@ -184,13 +196,20 @@ class Course(Muddle):
             params.update(self.request_params)
             return requests.post(self.api_url, params=params, verify=False)
 
-    def import_data(self):
+    def export_data(self, export_to, delete_content=False):
         """
-        core_course_import_course
-        Import course data from a course into another course.
+        Export course data to another course.
         Does not include any user data.
+
+        :param bool delete_content: (optional) Delete content \
+            from source course.
         """
-        return NotImplemented
+        params = {'wsfunction': 'core_course_import_course',
+                  'importfrom': self.course_id,
+                  'importto': export_to,
+                  'deletecontent': int(delete_content)}
+        params.update(self.request_params)
+        return requests.post(self.api_url, params=params, verify=False)
 
 
 class Category(Muddle):
@@ -199,15 +218,14 @@ class Category(Muddle):
     def __init__(self, category_id=None):
         self.category_id = category_id
 
-    @property
     def details(self):
         """
         Returns details for given category
         :returns: category response object
         """
         params = {'wsfunction': 'core_course_get_categories',
-                  'criteria[0][key]=': 'id',
-                  'criteria[0][value]=': self.category_id}
+                  'criteria[0][key]': 'id',
+                  'criteria[0][value]': self.category_id}
 
         params.update(self.request_params)
 
@@ -277,4 +295,4 @@ class Category(Muddle):
         core_course_update_categories
         Update categories
         """
-
+        return NotImplemented
