@@ -83,6 +83,10 @@ class Course(Muddle):
         :keyword string lang: (optional) Force course language.
         :keyword string forcetheme: (optional) Name of the force theme
 
+        Example Usage::
+
+        >>> import muddle
+        >>> muddle.course().create('a new course', 'new-course', 20)
         """
 
         allowed_options = ['idnumber', 'summaryformat',
@@ -112,11 +116,17 @@ class Course(Muddle):
 
             params.update(option_params)
             params.update(self.request_params)
+
             return requests.post(self.api_url, params=params, verify=False)
 
     def delete(self):
         """
         Deletes a specified courses
+
+        Example Usage::
+
+        >>> import muddle
+        >>> muddle.course(10).delete()
         """
 
         params = {'wsfunction': 'core_course_delete_courses',
@@ -130,11 +140,17 @@ class Course(Muddle):
         Returns entire contents of course page
 
         :returns: response object
+
+        Example Usage::
+
+        >>> import muddle
+        >>> muddle.course(10).content()
         """
 
         params = self.request_params
         params.update({'wsfunction': 'core_course_get_contents',
                        'courseid': self.course_id})
+
         return requests.get(self.api_url, params=params, verify=False).json()
 
     def duplicate(self, fullname, shortname, categoryid,
@@ -166,6 +182,11 @@ class Course(Muddle):
             Include histories
 
         :returns: response object
+
+        Example Usage::
+
+        >>> import muddle
+        >>> muddle.course(10).duplicate('new-fullname', 'new-shortname', 20)
         """
 
         # TODO
@@ -194,6 +215,7 @@ class Course(Muddle):
                       'visible': int(visible)}
             params.update(option_params)
             params.update(self.request_params)
+
             return requests.post(self.api_url, params=params, verify=False)
 
     def export_data(self, export_to, delete_content=False):
@@ -203,12 +225,18 @@ class Course(Muddle):
 
         :param bool delete_content: (optional) Delete content \
             from source course.
+
+        Example Usage::
+
+        >>> import muddle
+        >>> muddle.course(10).export_data(12)
         """
         params = {'wsfunction': 'core_course_import_course',
                   'importfrom': self.course_id,
                   'importto': export_to,
                   'deletecontent': int(delete_content)}
         params.update(self.request_params)
+
         return requests.post(self.api_url, params=params, verify=False)
 
 
@@ -221,7 +249,13 @@ class Category(Muddle):
     def details(self):
         """
         Returns details for given category
+
         :returns: category response object
+
+        Example Usage::
+
+        >>> import muddle
+        >>> muddle.category(10).details()
         """
         params = {'wsfunction': 'core_course_get_categories',
                   'criteria[0][key]': 'id',
@@ -268,7 +302,6 @@ class Category(Muddle):
                       }
             params.update(option_params)
             params.update(self.request_params)
-            print(params)
 
             return requests.post(self.api_url, params=params, verify=False)
 
@@ -279,6 +312,11 @@ class Category(Muddle):
 
         :param int new_parent: (optional) Category ID of new parent
         :param bool recursive: recursively delete contents inside this category
+
+        Example Usage::
+
+        >>> import muddle
+        >>> muddle.category(10).delete()
         """
 
         params = {'wsfunction': 'core_course_delete_categories',
