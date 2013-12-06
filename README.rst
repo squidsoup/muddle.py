@@ -23,7 +23,7 @@ basic usage::
 
   moodle = muddle.authenticate(API_KEY, API_URL)
 
-  course_contents = moodle.course(10).contents
+  course_contents = moodle.course(10).contents()
 
 Documentation
 ------------
