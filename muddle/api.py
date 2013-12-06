@@ -328,9 +328,37 @@ class Category(Muddle):
 
         return requests.post(self.api_url, params=params, verify=False)
 
-    def update_category(self):
+    def update(self, **kwargs):
         """
-        core_course_update_categories
         Update categories
+
+        :param string name: (optional) Name
+        :param string idnumber: (optional) Id number
+        :param int parent: (optional) Parent category id
+        :param string description: (optional) Description
+        :param int description-format: Defaults to 1 \
+            (1 = HTML, 0 = MOODLE, 2 = PLAIN or 4 = MARKDOWN)
+        :param string theme: (optional) Theme
+
+        Example Usage::
+
+        >>> import muddle
+        >>> muddle.category(10).update(name='new name')
         """
-        return NotImplemented
+
+        allowed_options = ['name', 'idnumber', 'parent',
+                           'description', 'descriptionformat',
+                           'theme']
+
+        if valid_options(kwargs, allowed_options):
+            option_params = {}
+            for key in kwargs:
+                option_params.update(
+                    {'categories[0][' + key + ']': str(kwargs.get(key))})
+
+            params = {'wsfunction': 'core_course_update_categories',
+                      'categories[0][id]': self.category_id}
+            params.update(option_params)
+            params.update(self.request_params)
+
+            return requests.post(self.api_url, params=params, verify=False)
