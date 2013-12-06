@@ -26,8 +26,7 @@ basic usage::
 Documentation
 ------------
 
-Documentation is available on `Read the Docs`_.
-.. _Read the Docs: http://muddlepy.readthedocs.org/en/latest/
+Documentation is available from: <http://muddlepy.readthedocs.org/en/latest/>
 
 Installation
 ------------
