@@ -23,6 +23,11 @@ basic usage::
 
   course_contents = moodle.course(10).contents
 
+Documentation
+------------
+
+Documentation is available on `Read the Docs`_.
+.. _Read the Docs: http://muddlepy.readthedocs.org/en/latest/
 
 Installation
 ------------
