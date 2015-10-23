@@ -1,18 +1,9 @@
 muddle.py
 =========
 
-PLEASE NOTE
------------
-**This repo has been forked and is no longer maintained.**
-
-**Please see the official aspiredu repository at:**
-
-muddle.py_
-
-
 About
 -----
-A python client for the Moodle 2.0 Web API.
+A rather incomplete python client for the Moodle 2.0 Web API. Feel free to give it some love.
 
 .. image:: https://badge.fury.io/py/muddle.png
     :target: http://badge.fury.io/py/muddle
